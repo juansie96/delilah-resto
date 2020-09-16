@@ -31,4 +31,4 @@ exports.validateAdmin = (req, res, next) => {
             error: "Unauthorized - Only administrators users can manage this resource"
         });
     }
-}
+};

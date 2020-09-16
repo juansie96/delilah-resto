@@ -61,7 +61,7 @@ exports.addOrder = (req, res) => {
 
         })
         .catch(error => res.status(500).json({
-            msg: "Server Internal Error",
+            error: "Server Internal Error",
             errorData: error,
             success: false
         }));
@@ -88,7 +88,7 @@ exports.updateOrderStatus = (req, res) => {
         console.log(err);
         res.status(500).json({
             success: false,
-            msg: 'Server internal error'
+            error: 'Server internal error'
         })
     });
 

@@ -19,11 +19,9 @@ exports.login = (req, res) => {
         username,
         password
     } = req.body;
-    db.query('SELECT * FROM users WHERE username = :username', {
+    db.query('SELECT * FROM users WHERE username = ?', {
             type: QueryTypes.SELECT,
-            replacements: {
-                username: username
-            }
+            replacements: [username]
         })
         .then((queryResponse) => {
             const user = queryResponse[0];
@@ -58,7 +56,7 @@ exports.login = (req, res) => {
             }
         })
         .catch(error => res.status(500).json({
-            msg: "Server Internal Error",
+            error: "Server Internal Error",
             errorData: error,
             success: false
         }));
@@ -88,7 +86,7 @@ exports.register = (req, res) => {
         });
     })
     .catch(error => res.status(500).json({
-        msg: "Server Internal Error",
+        error: "Server Internal Error",
         errorData: error,
         success: false
     }));
