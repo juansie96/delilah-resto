@@ -21,15 +21,32 @@ CREATE TABLE products (
     `description` VARCHAR(255) NOT NULL
 );
 
+CREATE TABLE status_code (
+	`status_id` INT(11) NOT NULL AUTO_INCREMENT,
+	`status` VARCHAR(50) NOT NULL,
+	`description` VARCHAR(300) NOT NULL,
+	PRIMARY KEY (`status_id`)
+);
+ 
+CREATE TABLE payment (
+	`payment_id` INT(11) NOT NULL AUTO_INCREMENT,
+	`payment_method` VARCHAR(30) NOT NULL,
+	PRIMARY KEY (`payment_id`)
+);
+
+
 CREATE TABLE orders (
     `order_id` INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    `status` VARCHAR(60) NOT NULL,
+    `status_id` INT,
     `date` DATETIME NOT NULL,
     `description` VARCHAR(200) NOT NULL,
-    `payment_method` VARCHAR(60) NOT NULL,
+    `payment_id` INT,
     `total` FLOAT NOT NULL,
+    `address` VARCHAR(200) NOT NULL,
     `user_id` INT,
-    FOREIGN KEY(user_id) REFERENCES users(user_id)
+    FOREIGN KEY(user_id) REFERENCES users(user_id),
+    FOREIGN KEY(status_id) REFERENCES status_code(status_id),
+    FOREIGN KEY(payment_id) REFERENCES payment(payment_id)
 );
 
 CREATE TABLE orders_products (
@@ -41,17 +58,29 @@ CREATE TABLE orders_products (
     FOREIGN KEY(product_id) REFERENCES products(product_id)
 );
 
+
 -- Populate Users
 
 INSERT INTO users VALUES (
     NULL,
+    "admin",
+    "$2a$10$3DEoitH3XgcN7/xHd.EKie3mPzLAOFI3I1QYRKROReAyN4fBFeaT6",
+    "Administrator",
+    "admin@admin.com",
+    "1234354352",
+    "Admin Street 173",
+    TRUE
+);
+
+INSERT INTO users VALUES (
+    NULL,
     "juanmsierra",
-    "$2a$10$tMwUXYQK9vYr8jP1OLRxtOnR5GSBRnjuigIJqM5yqL3n3sOGb0U3y",
+    "$2a$10$ZV0D.ULYR24hLRChP6mSZe/feRr6oYjCx.KUXl9SqKwGc6nlJI1i.",
     "Juan Sierra",
     "juanmsierra96@gmail.com",
     "3875125975",
     "Peredo 173",
-    TRUE
+    FALSE
 );
 
 INSERT INTO users VALUES (
@@ -127,55 +156,77 @@ INSERT INTO products VALUES (
     "Just regular water"
 );
 
+-- Populate StatusCode
+
+INSERT INTO status_code VALUES 
+(NULL, "new", "Order created successfully"),
+(NULL, "confirmed", "The order was confimed"),
+(NULL, "cooking", "Preparing the order"),
+(NULL, "sending", "Order in the way"), 
+(NULL, "delivered", "The order was successfully delivered"),
+(NULL, "canceled", "Order cancelled");
+
+-- Populate Payment
+
+INSERT INTO payment VALUES 
+(NULL, "cash"),
+(NULL, "creditcard"),
+(NULL, "debit");
+
 -- Populate Orders
 
 INSERT INTO orders VALUES (
     NULL,
-    "new",
+    1,
     NOW(),
     "2x DoubleCheeseBurger, 2x Coke500ml",
-    "cash",
+    1,
     900,
+    "Peredo St 231",
     1
 );
 
 INSERT INTO orders VALUES (
     NULL,
-    "confirmed",
+    2,
     NOW(),
     "1x PepperoniPizza, 2x Coke500ml",
-    "credit",
+    2,
     720,
+    "Admin Street 173",
     2
 );
 
 INSERT INTO orders VALUES (
     NULL,
-    "preparing",
+    3,
     NOW(),
     "1x MilanesaNapolitana, 1x Coke500ml",
-    "cash",
+    3,
     520,
+    "Av. Sarmiento 1411",
     3
 );
 
 INSERT INTO orders VALUES (
     NULL,
-    "sending",
+    4,
     NOW(),
     "1x ChickenWithSalad, 1x Water",
-    "debit",
+    1,
     380,
+    "25 de mayo 7642",
     1
 );
 
 INSERT INTO orders VALUES (
     NULL,
-    "delivered",
+    5,
     NOW(),
     "1x DoubleCheeseBurger, 1x PepperoniPizza, 3x Coke500ml",
-    "cash",
+    2,
     1170,
+    "O'higgins 567",
     1
 );
 
@@ -194,5 +245,4 @@ VALUES
     (NULL,4,6,1),
     (NULL,5,1,1),
     (NULL,5,2,1),
-    (NULL,5,5,3)
-
+    (NULL,5,5,3);
