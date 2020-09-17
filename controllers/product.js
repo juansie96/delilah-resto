@@ -4,7 +4,6 @@ const {
 const db = require('../db/database');
 
 exports.getProducts = (req, res) => {
-    console.log(req.token_info);
     db.query('SELECT * FROM products', {
             type: QueryTypes.SELECT
         })
@@ -31,7 +30,6 @@ exports.addNewProduct = (req, res) => {
             });
         })
         .catch(err => {
-            console.log(err);
             res.status(500).json({
                 success: false,
                 error: 'Server internal error'
@@ -52,3 +50,52 @@ exports.getProductById = (req, res) => {
              success: false
          }));
 };
+
+exports.editProductById = (req, res) => {
+    const product = req.body;
+    const {productId} = req.params;
+    const {
+        name,
+        price,
+        imageUrl,
+        description
+    } = req.body;
+
+    db.query('UPDATE products SET name = ?, price = ?, imageUrl = ?, description = ? WHERE product_id = ?', {
+            type: QueryTypes.UPDATE,
+            replacements: [name, price, imageUrl, description, productId]
+        })
+        .then(() => {
+            res.status(201).json({
+                success: true,
+                msg: "Product updated successfully",
+                product: product
+            });
+        })
+        .catch(err => {
+            res.status(500).json({
+                success: false,
+                error: 'Server internal error'
+            });
+        });
+}
+
+exports.deleteProductById = (req, res) => {
+    const {
+        productId
+    } = req.params;
+
+    db.query('DELETE FROM products WHERE product_id = ?', {
+            type: QueryTypes.DELETE,
+            replacements: [productId]
+        })
+        .then(products => res.json({
+            success: true,
+            msg: "Product deleted successfully"
+        }))
+        .catch(error => res.status(500).json({
+            error: "Server Internal Error",
+            success: false
+        }));
+};
+

@@ -93,3 +93,51 @@ exports.updateOrderStatus = (req, res) => {
     });
 
 };
+
+exports.getAllOrders = (req, res) => {
+    console.log(req.token_info);
+    db.query('SELECT * FROM orders', {
+            type: QueryTypes.SELECT
+        })
+        .then(orders => res.json(orders))
+        .catch(error => res.status(500).json({
+            error: "Server Internal Error",
+            success: false
+        }));
+};
+
+exports.getOrderById = (req, res) => {
+    const {
+        orderId
+    } = req.params;
+
+    db.query('SELECT * FROM orders WHERE order_id = ?', {
+            type: QueryTypes.SELECT,
+            replacements: [orderId]
+        })
+        .then(order => res.json(order[0]))
+        .catch(error => res.status(500).json({
+            error: "Server Internal Error",
+            success: false
+        }));
+};
+
+exports.deleteOrderById = (req, res) => {
+    const {
+        orderId
+    } = req.params;
+
+    db.query('DELETE FROM ORDERS WHERE order_id = ?', {
+            type: QueryTypes.DELETE,
+            replacements: [orderId]
+        })
+        .then(() => res.json({
+            success: true,
+            msg: "Order deleted successfully",
+            order: req.params.order
+        }))
+        .catch(error => res.status(500).json({
+            error: "Server Internal Error",
+            success: false
+        }));
+};

@@ -13,10 +13,9 @@ const {
 
 router.get('/', validateAccessToken, productController.getProducts);
 router.post('/', [validateAccessToken, validateAdmin, productBody, productNameExists], productController.addNewProduct);
-// get by id (productIdExists)
 router.get('/:productId', [validateAccessToken, validateProductId], productController.getProductById);
+router.put('/:productId', [validateAccessToken, validateAdmin, productBody, validateProductId], productController.editProductById);
+router.delete('/:productId', [validateAccessToken, validateAdmin, validateProductId], productController.deleteProductById);
 
-// delete by id
-// put by id
 
 module.exports = router;

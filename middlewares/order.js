@@ -56,55 +56,87 @@ exports.orderIdExists = (req, res, next) => {
         orderId
     } = req.params;
 
-    console.log(orderId);
-
     db.query('SELECT * FROM orders WHERE order_id = ?', {
-        type: QueryTypes.SELECT,
-        replacements: [orderId]
-    })
-    .then(orders => {
-        console.log(orders);
-        if (!orders.length) {
-            res.status(404).json({
+            type: QueryTypes.SELECT,
+            replacements: [orderId]
+        })
+        .then(orders => {
+
+            if (!orders.length) {
+                res.status(404).json({
+                    success: false,
+                    error: "Order id not found"
+                });
+            } else {
+                req.params.order = orders[0];
+                next();
+            }
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
                 success: false,
-                error: "Order id not found"
+                error: 'Server internal error'
             });
-        } else {
-            next();
-        }
-    })
-    .catch(err => {
-        console.log(err);
-        res.status(500).json({
-            success: false,
-            error: 'Server internal error'
         });
-    });
 };
 
 exports.orderStatusIdExists = (req, res, next) => {
-    const {status_id} = req.body;
+    const {
+        status_id
+    } = req.body;
 
     db.query('SELECT * FROM status_code WHERE status_id = ?', {
-        type: QueryTypes.SELECT,
-        replacements: [status_id]
-    })
-    .then(result => {
-        const status = result[0];
-        if (status) {
-            next();
-        } else {
-            res.status(404).json({
+            type: QueryTypes.SELECT,
+            replacements: [status_id]
+        })
+        .then(result => {
+            const status = result[0];
+            if (status) {
+                next();
+            } else {
+                res.status(404).json({
+                    success: false,
+                    error: "status_id not valid"
+                });
+            }
+        })
+        .catch(err => {
+            res.status(500).json({
                 success: false,
-                error: "status_id not valid"
+                error: 'Server internal error'
             });
-        }
-    })
-    .catch(err => {
-        res.status(500).json({
-            success: false,
-            error: 'Server internal error'
         });
-    });
-    
-}
+
+};
+
+exports.validateUserOrder = (req, res, next) => {
+    const {
+        orderId
+    } = req.params;
+
+    const {
+        user_id,
+        is_admin
+    } = req.token_info;
+
+    db.query('SELECT * FROM orders WHERE order_id = ?', {
+            type: QueryTypes.SELECT,
+            replacements: [orderId]
+        })
+        .then(response => {
+            const order = response[0];
+            if (order.user_id === user_id || is_admin) {
+                next();
+            } else {
+                res.status(401).json({
+                    success: false,
+                    error: "You don't have authorization to see other users orders"
+                });
+            }
+        })
+        .catch(error => res.status(500).json({
+            error: "Server Internal Error",
+            success: false
+        }));
+};

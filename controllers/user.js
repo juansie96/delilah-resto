@@ -91,3 +91,36 @@ exports.register = (req, res) => {
         success: false
     }));
 };
+
+exports.getAllUsers = (req, res) => {
+    db.query('SELECT * FROM users', {
+            type: QueryTypes.SELECT
+        })
+        .then(users => res.json(users))
+        .catch(error => res.status(500).json({
+            error: "Server Internal Error",
+            success: false
+        }));
+};
+
+exports.getUserById = (req, res) => {
+    const {
+        userId,
+        orders
+    } = req.params;
+
+    console.log(orders);
+
+    db.query('SELECT * FROM users WHERE user_id = ?', {
+            type: QueryTypes.SELECT,
+            replacements: [userId]
+        })
+        .then(users => res.json({
+            user: users[0],
+            userOrders: orders
+        }))
+        .catch(error => res.status(500).json({
+            error: "Server Internal Error",
+            success: false
+        }));
+};

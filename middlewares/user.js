@@ -31,7 +31,6 @@ exports.validateMailUsername = (req, res, next) => {
             }
         })
         .catch(err => {
-            console.log(err);
             res.status(500).json({
                 success: false,
                 error: 'Server internal error'
@@ -89,4 +88,67 @@ exports.loginBody = (req, res, next) => {
     } else {
         next();
     }
+};
+
+exports.validateUserId = (req, res, next) => {
+    const {userId} = req.params;
+    const {user_id, is_admin} = req.token_info;
+    if (is_admin || user_id == userId) {
+        next();
+    } else {
+        res.status(401).json({
+            success: false,
+            msg: "Not authorized to make this request"
+        });
+    }
+};
+
+exports.userIdExists = (req, res, next) => {
+    const {
+        userId
+    } = req.params;
+
+    db.query('SELECT * FROM users WHERE user_id = ?', {
+            type: QueryTypes.SELECT,
+            replacements: [userId]
+        })
+        .then(users => {
+
+            if (!users.length) {
+                res.status(404).json({
+                    success: false,
+                    error: "User id not found"
+                });
+            } else {
+                // req.params.order = users[0];
+                next();
+            }
+        })
+        .catch(err => {
+            res.status(500).json({
+                success: false,
+                error: 'Server internal error'
+            });
+        });
+};
+
+exports.getUserOrders = (req, res, next) => {
+    const {
+        userId
+    } = req.params;
+
+    db.query('SELECT * FROM orders WHERE user_id = ?', {
+            type: QueryTypes.SELECT,
+            replacements: [userId]
+        })
+        .then(orders => {
+            req.params.orders = orders;
+            next();
+        })
+        .catch(err => {
+            res.status(500).json({
+                success: false,
+                error: 'Server internal error'
+            });
+        });
 };
