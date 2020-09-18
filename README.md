@@ -59,7 +59,7 @@ npm start
 
 ### 🚀 Testeando la API con POSTMAN
 
-[Postman Collecion] (https://documenter.getpostman.com/view/12787986/TVKBXxuW).
+[Postman Collection](https://documenter.getpostman.com/view/12787986/TVKBXxuW)
 
 ### Usuarios para testear API. (Admin y Normal)
 
