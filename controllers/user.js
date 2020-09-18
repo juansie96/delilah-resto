@@ -10,10 +10,6 @@ const {
     QueryTypes
 } = require('sequelize');
 
-exports.getUsers = () => {
-
-};
-
 exports.login = (req, res) => {
     const {
         username,
@@ -118,6 +114,61 @@ exports.getUserById = (req, res) => {
         .then(users => res.json({
             user: users[0],
             userOrders: orders
+        }))
+        .catch(error => res.status(500).json({
+            error: "Server Internal Error",
+            success: false
+        }));
+};
+
+exports.editUserById = (req, res) => {
+ 
+    const {
+        userId
+    } = req.params;
+
+    const {
+        username,
+        password,
+        fullname,
+        email,
+        phone,
+        address
+    } = req.body;
+    
+    const hashedPassword = bcrypt.hashSync(password, 10);
+    db.query('UPDATE users SET username = ?, password = ?, fullname = ?, email = ?, phone = ?, address = ? WHERE user_id = ?', {
+            type: QueryTypes.UPDATE,
+            replacements: [username, hashedPassword, fullname, email, phone, address, userId]
+        })
+        .then(() => {
+            res.status(201).json({
+                success: true,
+                msg: "User updated successfully",
+            });
+        })
+        .catch(err => {
+            res.status(500).json({
+                success: false,
+                error: 'Server internal error'
+            });
+        });
+};
+
+exports.deleteUserById = (req, res) => {
+    const {
+        userId,
+        user
+    } = req.params;
+
+    db.query('DELETE FROM users WHERE user_id = ?', {
+            type: QueryTypes.DELETE,
+            replacements: [userId]
+        })
+        .then(() => res.json({
+            success: true,
+            msg: "User deleted successfully",
+            deletedUser: user
         }))
         .catch(error => res.status(500).json({
             error: "Server Internal Error",

@@ -48,13 +48,15 @@ exports.addOrder = (req, res) => {
                         success: true,
                         msg: "Order created successfully",
                         order: {
+                            user_id: req.token_info.user_id,
+                            username: req.token_info.username,
                             status: "new",
                             date: dateSQL,
                             description: description,
                             payment_id: payment_id,
-                            total: totalPrice,
                             address: address,
-                            username: req.token_info.username
+                            products: products,
+                            total: totalPrice,
                         }
                     });
                 });

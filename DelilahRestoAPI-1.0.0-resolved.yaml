@@ -1,0 +1,1197 @@
+---
+openapi: "3.0.0"
+info:
+  title: "Delilah Resto API"
+  description: "Es una API que permite manejar distintas operaciones para un restaurant,\
+    \ como por ejemplo, crear tu usuario, loguearte y hacer pedidos. Los usuarios\
+    \ con privilegios de administrador pueden agregar, modificar  eliminar productos,\
+    \ cambiar el estado de los pedidos, etc."
+  contact:
+    email: "juanmsierra96@gmail.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+  version: "1.0.0"
+servers:
+- url: "https://virtserver.swaggerhub.com/juansie96/DelilahRestoAPI/1.0.0"
+  description: "SwaggerHub API Auto Mocking"
+- url: "https://localhost:3000"
+  description: "Local Server"
+paths:
+  /users/register:
+    post:
+      tags:
+      - "Users"
+      summary: "Add a new user"
+      description: "Add a new user to the database"
+      operationId: "addUser"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserBodyStructure"
+        required: true
+      responses:
+        "201":
+          description: "User created"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  success:
+                    type: "boolean"
+                    example: true
+                  msg:
+                    type: "string"
+                    example: "User successfully created"
+        "422":
+          description: "Invalid body input"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorUserBody"
+        "409":
+          description: "Invalid username"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  success:
+                    type: "boolean"
+                    example: false
+                  error:
+                    type: "string"
+                    example: "Username already exists"
+  /users/login:
+    post:
+      tags:
+      - "Users"
+      summary: "Login existing user"
+      description: "Login existing user and get the token"
+      operationId: "loginUser"
+      requestBody:
+        description: "Username and password of the user"
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                username:
+                  type: "string"
+                  example: "liomessi"
+                password:
+                  type: "string"
+                  example: "messifcb123"
+        required: true
+      responses:
+        "200":
+          description: "Logged in"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  success:
+                    type: "boolean"
+                    example: true
+                  user_id:
+                    type: "integer"
+                    example: 4
+                  username:
+                    type: "string"
+                    example: "liomessi"
+                  is_admin:
+                    type: "boolean"
+                    example: false
+                  accesstoken:
+                    type: "string"
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6ImFkbWluIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTYwMDE5Nzg0Nn0._N0g15yJHAXxH98R1Mfzy9URQjzy13F0fScbygpCGEU"
+        "401":
+          description: "Incorrect user or password"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  success:
+                    type: "boolean"
+                    example: false
+                  error:
+                    type: "string"
+                    example: "User/Password Incorrect"
+  /users:
+    get:
+      tags:
+      - "Users"
+      summary: "Get all users (Admin)"
+      description: "Get list with registered users"
+      operationId: "getAllUsers"
+      parameters:
+      - name: "access-token"
+        in: "header"
+        description: "Admin token"
+        required: true
+        style: "simple"
+        explode: false
+        schema:
+          $ref: "#/components/schemas/AuthorizationHeaders"
+      responses:
+        "200":
+          description: "Array with all users"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/User"
+        "401":
+          description: "Unauthorized - Invalid Token"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorToken"
+  /users/{id}:
+    get:
+      tags:
+      - "Users"
+      summary: "Get user by id"
+      description: "Admin has global access. Normal users only can access their id"
+      operationId: "getUserById"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        style: "simple"
+        explode: false
+        schema:
+          type: "integer"
+      - name: "access-token"
+        in: "header"
+        description: "user token"
+        required: true
+        style: "simple"
+        explode: false
+        schema:
+          $ref: "#/components/schemas/AuthorizationHeaders"
+      responses:
+        "200":
+          description: "User object"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/UserById"
+        "404":
+          description: "Id not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorId"
+        "401":
+          description: "Unauthorized - Invalid Token"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorToken"
+    put:
+      tags:
+      - "Users"
+      summary: "Edit user by id"
+      description: "Admin has global access. Normal users only can access their id."
+      operationId: "editUserById"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        style: "simple"
+        explode: false
+        schema:
+          type: "integer"
+      - name: "access-token"
+        in: "header"
+        description: "user token"
+        required: true
+        style: "simple"
+        explode: false
+        schema:
+          $ref: "#/components/schemas/AuthorizationHeaders"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserBodyStructure"
+        required: true
+      responses:
+        "200":
+          description: "User updated"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  success:
+                    type: "boolean"
+                    example: true
+                  msg:
+                    type: "string"
+                    example: "User updated successfully"
+        "422":
+          description: "Invalid input"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorUserBody"
+        "401":
+          description: "Unauthorized - Invalid Token"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorToken"
+        "404":
+          description: "Id not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorId"
+        "409":
+          description: "Invalid email"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  success:
+                    type: "boolean"
+                    example: false
+                  error:
+                    type: "string"
+                    example: "Mail already exists"
+    delete:
+      tags:
+      - "Users"
+      summary: "Delete user by id (Admin)"
+      description: "Delete user by id"
+      operationId: "deleteUserbyID"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        style: "simple"
+        explode: false
+        schema:
+          type: "integer"
+      - name: "access-token"
+        in: "header"
+        description: "admin token"
+        required: true
+        style: "simple"
+        explode: false
+        schema:
+          $ref: "#/components/schemas/AuthorizationHeaders"
+      responses:
+        "200":
+          description: "Product deleted"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeletedUser"
+        "401":
+          description: "Unauthorized - Invalid Token"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorToken"
+        "404":
+          description: "Id not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorId"
+  /products:
+    get:
+      tags:
+      - "Products"
+      summary: "List products"
+      description: "List all available products"
+      parameters:
+      - name: "access-token"
+        in: "header"
+        description: "User token"
+        required: true
+        style: "simple"
+        explode: false
+        schema:
+          $ref: "#/components/schemas/AuthorizationHeaders"
+      responses:
+        "200":
+          description: "Array with all products"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Product"
+        "401":
+          description: "Unauthorized - Invalid Token"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorToken"
+    post:
+      tags:
+      - "Products"
+      summary: "Add product (Admin)"
+      description: "Create a new product"
+      parameters:
+      - name: "access-token"
+        in: "header"
+        description: "Admin token"
+        required: true
+        style: "simple"
+        explode: false
+        schema:
+          $ref: "#/components/schemas/AuthorizationHeaders"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductBodyStructure"
+        required: true
+      responses:
+        "201":
+          description: "Product created"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  success:
+                    type: "boolean"
+                    example: true
+                  msg:
+                    type: "string"
+                    example: "Product created successfully"
+                  product:
+                    $ref: "#/components/schemas/ProductBodyStructure"
+        "422":
+          description: "Invalid input"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorProductBody"
+        "409":
+          description: "Product name already exists"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  success:
+                    type: "boolean"
+                    example: false
+                  error:
+                    type: "string"
+                    example: "Product name already exists"
+        "401":
+          description: "Unauthorized - Invalid Token"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorToken"
+  /products/{id}:
+    get:
+      tags:
+      - "Products"
+      summary: "Get product by id"
+      description: "Get product by id"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Id of the product"
+        required: true
+        style: "simple"
+        explode: false
+        schema:
+          type: "integer"
+      - name: "access-token"
+        in: "header"
+        description: "Admin token"
+        required: true
+        style: "simple"
+        explode: false
+        schema:
+          $ref: "#/components/schemas/AuthorizationHeaders"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: "Id not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorId"
+        "401":
+          description: "Unauthorized - Invalid Token"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorToken"
+    put:
+      tags:
+      - "Products"
+      summary: "Edit product (Admin)"
+      description: "Edit existing product"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Id of the product"
+        required: true
+        style: "simple"
+        explode: false
+        schema:
+          type: "integer"
+      - name: "access-token"
+        in: "header"
+        description: "Admin token"
+        required: true
+        style: "simple"
+        explode: false
+        schema:
+          $ref: "#/components/schemas/AuthorizationHeaders"
+      requestBody:
+        description: "Product properties"
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EditProduct"
+        required: true
+      responses:
+        "200":
+          description: "Product updated successfully"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EditedProduct"
+        "404":
+          description: "Id not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorId"
+        "401":
+          description: "Unauthorized - Invalid Token"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorToken"
+        "422":
+          description: "Invalid input"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorProductBody"
+    delete:
+      tags:
+      - "Products"
+      summary: "Delete product (Admin)"
+      description: "Delete a product"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Id of the product"
+        required: true
+        style: "simple"
+        explode: false
+        schema:
+          type: "integer"
+      - name: "access-token"
+        in: "header"
+        description: "Admin token"
+        required: true
+        style: "simple"
+        explode: false
+        schema:
+          $ref: "#/components/schemas/AuthorizationHeaders"
+      responses:
+        "204":
+          description: "Product deleted successfully"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeletedProduct"
+        "404":
+          description: "Invalid id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorId"
+        "401":
+          description: "Unauthorized - Invalid Token"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorToken"
+  /orders:
+    get:
+      tags:
+      - "Orders"
+      summary: "Get all orders (Admin)"
+      description: "Get all orders"
+      parameters:
+      - name: "access-token"
+        in: "header"
+        description: "Admin token"
+        required: true
+        style: "simple"
+        explode: false
+        schema:
+          $ref: "#/components/schemas/AuthorizationHeaders"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/AllOrders"
+        "401":
+          description: "Unauthorized - Invalid Token"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorToken"
+    post:
+      tags:
+      - "Orders"
+      summary: "Create a new order"
+      description: "Allows an user to create a new order. Method Payment ID = (1 -\
+        \ Cash), (2 - Credit Card), (3 - Debit)"
+      parameters:
+      - name: "access-token"
+        in: "header"
+        description: "User token"
+        required: true
+        style: "simple"
+        explode: false
+        schema:
+          $ref: "#/components/schemas/AuthorizationHeaders"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderBodyStructure"
+        required: true
+      responses:
+        "201":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  success:
+                    type: "boolean"
+                    example: true
+                  msg:
+                    type: "string"
+                    example: "Order created successfully"
+                  order:
+                    $ref: "#/components/schemas/Order"
+        "401":
+          description: "Unauthorized - Invalid Token"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorToken"
+        "422":
+          description: "Invalid input"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorOrderBody"
+  /orders/{id}:
+    get:
+      tags:
+      - "Orders"
+      summary: "Get order by id"
+      description: "Get specific order. Admins have global access. Normal users can\
+        \ only access to their id."
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "ID of the order"
+        required: true
+        style: "simple"
+        explode: false
+        schema:
+          type: "integer"
+      - name: "access-token"
+        in: "header"
+        description: "Admin token"
+        required: true
+        style: "simple"
+        explode: false
+        schema:
+          $ref: "#/components/schemas/AuthorizationHeaders"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "404":
+          description: "Id not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorId"
+        "401":
+          description: "No Authorization - Invalid Token"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorToken"
+        "422":
+          description: "Invalid id"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  success:
+                    type: "boolean"
+                    example: false
+                  error:
+                    type: "string"
+                    example: "Incorrect ID"
+    delete:
+      tags:
+      - "Orders"
+      summary: "Delete Order (Admin)"
+      description: "Delete an existing order"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Id of the order"
+        required: true
+        style: "simple"
+        explode: false
+        schema:
+          type: "integer"
+      - name: "access-token"
+        in: "header"
+        description: "Admin token"
+        required: true
+        style: "simple"
+        explode: false
+        schema:
+          $ref: "#/components/schemas/AuthorizationHeaders"
+      responses:
+        "200":
+          description: "Order deleted successfully"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeletedOrder"
+        "422":
+          description: "Invalid id"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  success:
+                    type: "boolean"
+                    example: false
+                  error:
+                    type: "string"
+                    example: "Incorrect ID"
+        "404":
+          description: "Id not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorId"
+    patch:
+      tags:
+      - "Orders"
+      summary: "Update Order Status (Admin)"
+      description: "Update an existing order status. id 1 - new . id 2 - confirmed\
+        \ . id 3 - cooking . id 4 - sending . id 5 - delivered . id 6 - canceled ."
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "The id of the order status you want to update"
+        required: true
+        style: "simple"
+        explode: false
+        schema:
+          type: "integer"
+      - name: "access-token"
+        in: "header"
+        description: "Admin token"
+        required: true
+        style: "simple"
+        explode: false
+        schema:
+          $ref: "#/components/schemas/AuthorizationHeaders"
+      requestBody:
+        description: "Order new status"
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateOrderStatus"
+        required: true
+      responses:
+        "200":
+          description: "Order updated"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdatedOrder"
+        "404":
+          description: "Id not found"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorId"
+components:
+  schemas:
+    errorToken:
+      type: "object"
+      properties:
+        success:
+          type: "boolean"
+          example: false
+        error:
+          type: "string"
+          example: "Unauthorized - Invalid Token"
+    errorUserBody:
+      type: "object"
+      properties:
+        success:
+          type: "boolean"
+          example: false
+        msg:
+          type: "string"
+          example: "The body request has semantic errors"
+        schemaExample:
+          $ref: "#/components/schemas/UserBodyStructure"
+    errorId:
+      type: "object"
+      properties:
+        success:
+          type: "boolean"
+          example: false
+        error:
+          type: "string"
+          example: "Id not found"
+    errorProductBody:
+      type: "object"
+      properties:
+        success:
+          type: "boolean"
+          example: false
+        error:
+          type: "string"
+          example: "The body request have semantic errors"
+        schemaExample:
+          $ref: "#/components/schemas/ProductBodyStructure"
+    errorOrderBody:
+      type: "object"
+      properties:
+        success:
+          type: "boolean"
+          example: false
+        error:
+          type: "string"
+          example: "The body request has semantic errors"
+        schemaExample:
+          $ref: "#/components/schemas/OrderBodyStructure"
+    AuthorizationHeaders:
+      type: "object"
+      properties:
+        Authorization:
+          type: "string"
+          example: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6Imp1YW5tc2llcnJhIiwiaXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE2MDAxOTc4MTV9.NwjJrW8cxaa54MAPBSiz4mAuw6CHmnv9q1FHQj1rH1s"
+    User:
+      type: "object"
+      properties:
+        user_id:
+          type: "integer"
+          format: "int64"
+          example: 1
+        username:
+          type: "string"
+          example: "liomessi"
+        password:
+          type: "string"
+          example: "$2a$10$62hj5eUUfVCnLfpbcs3ZiOLb4jEwsyZplMQSVqBTazy1YWQpPArXW"
+        fullname:
+          type: "string"
+          example: "Lionel Messi"
+        email:
+          type: "string"
+          example: "liomessi@gmail.com"
+        phone:
+          type: "string"
+          example: "1234657213"
+        address:
+          type: "string"
+          example: "Barcelona, España"
+        is_admin:
+          type: "boolean"
+          example: false
+    UserBodyStructure:
+      type: "object"
+      properties:
+        username:
+          type: "string"
+          example: "liomessi"
+        password:
+          type: "string"
+          example: "messifcb123"
+        fullname:
+          type: "string"
+          example: "Lionel Messi"
+        email:
+          type: "string"
+          example: "liomessi@gmail.com"
+        phone:
+          type: "string"
+          example: "3814302423"
+        address:
+          type: "string"
+          example: "Barcelona, España"
+    UserById:
+      type: "object"
+      properties:
+        user_id:
+          type: "integer"
+          format: "int64"
+          example: 1
+        username:
+          type: "string"
+          example: "liomessi"
+        password:
+          type: "string"
+          example: "$2a$10$62hj5eUUfVCnLfpbcs3ZiOLb4jEwsyZplMQSVqBTazy1YWQpPArXW"
+        fullname:
+          type: "string"
+          example: "Lionel Messi"
+        email:
+          type: "string"
+          example: "liomessi@gmail.com"
+        phone:
+          type: "string"
+          example: "3814302423"
+        address:
+          type: "string"
+          example: "Barcelona, España"
+        is_admin:
+          type: "integer"
+          example: 0
+        orders:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              id_order:
+                type: "integer"
+                example: 12
+    DeletedUser:
+      type: "object"
+      properties:
+        success:
+          type: "boolean"
+          example: true
+        msg:
+          type: "string"
+          example: "User deleted"
+        deletedUser:
+          type: "object"
+          properties:
+            user_id:
+              type: "integer"
+              format: "int64"
+              example: 1
+            username:
+              type: "string"
+              example: "liomessi"
+            password:
+              type: "string"
+              example: "$2a$10$62hj5eUUfVCnLfpbcs3ZiOLb4jEwsyZplMQSVqBTazy1YWQpPArXW"
+            fullname:
+              type: "string"
+              example: "Lionel Messi"
+            email:
+              type: "string"
+              example: "liomessi@gmail.com"
+            phone:
+              type: "string"
+              example: "1234657213"
+            address:
+              type: "string"
+              example: "Barcelona, España"
+            is_admin:
+              type: "boolean"
+              example: false
+    ProductBodyStructure:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+          example: "Pizza Calabresa"
+        price:
+          type: "number"
+          example: 3.5E+2
+        description:
+          type: "string"
+          example: "Pizza de 8 porciones llena de calabresa"
+        imageUrl:
+          type: "string"
+          example: "https://www.fakeurl.com/pizza.jpg"
+    Product:
+      type: "object"
+      properties:
+        product_id:
+          type: "integer"
+          format: "int64"
+          example: 1
+        name:
+          type: "string"
+          example: "Pizza Calabresa"
+        price:
+          type: "number"
+          example: 3.5E+2
+        description:
+          type: "string"
+          example: "Pizza de 8 porciones llena de calabresa"
+        imageUrl:
+          type: "string"
+          example: "https://www.fakeurl.com/pizza.jpg"
+    EditProduct:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+          example: "Pizza Calabresa"
+        price:
+          type: "number"
+          example: 3.5E+2
+        description:
+          type: "string"
+          example: "Pizza de 8 porciones llena de calabresa"
+        imageUrl:
+          type: "string"
+          example: "https://www.fakeurl.com/pizza.jpg"
+    EditedProduct:
+      type: "object"
+      properties:
+        success:
+          type: "boolean"
+          example: true
+        msg:
+          type: "string"
+          example: "Product updated"
+        editedProduct:
+          type: "object"
+          properties:
+            product_id:
+              type: "integer"
+              format: "int64"
+              example: 1
+            name:
+              type: "string"
+              example: "Pizza Calabresa"
+            price:
+              type: "number"
+              example: 3.5E+2
+            description:
+              type: "string"
+              example: "Pizza de 8 porciones llena de calabresa"
+            imageUrl:
+              type: "string"
+              example: "https://www.fakeurl.com/pizza.jpg"
+    DeletedProduct:
+      type: "object"
+      properties:
+        success:
+          type: "boolean"
+          example: true
+        msg:
+          type: "string"
+          example: "Product deleted successfully"
+        deletedOrder:
+          type: "object"
+          properties:
+            product_id:
+              type: "integer"
+              format: "int64"
+              example: 1
+            name:
+              type: "string"
+              example: "Pizza Calabresa"
+            price:
+              type: "number"
+              example: 3.5E+2
+            description:
+              type: "string"
+              example: "Pizza de 8 porciones llena de calabresa"
+            imageUrl:
+              type: "string"
+              example: "https://www.fakeurl.com/pizza.jpg"
+    OrderBodyStructure:
+      type: "object"
+      properties:
+        products:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              id_product:
+                type: "integer"
+                example: 1
+              quantity:
+                type: "integer"
+                example: 1
+        payment_id:
+          type: "integer"
+          example: 1
+        address:
+          type: "string"
+          example: "Peredo 173 6C"
+    Order:
+      type: "object"
+      properties:
+        order_id:
+          type: "integer"
+          format: "int64"
+          example: 3
+        user_id:
+          type: "integer"
+          format: "int64"
+          example: 1
+        payment_id:
+          type: "integer"
+          example: 3
+        status_id:
+          type: "integer"
+          example: 1
+        date:
+          type: "string"
+          description: "date"
+          example: "18/09/2020 17:35:00"
+        description:
+          type: "string"
+          example: "x1 DoubleCheeseBurger"
+        address:
+          type: "string"
+          example: "Peredo 173 6C"
+        products:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              id_product:
+                type: "integer"
+                example: 1
+              quantity:
+                type: "integer"
+                example: 1
+        total:
+          type: "number"
+          example: 3.5E+2
+    AllOrders:
+      type: "object"
+      properties:
+        order_id:
+          type: "integer"
+          format: "int64"
+          example: 5
+        status_id:
+          type: "integer"
+          example: 1
+        date:
+          type: "string"
+          description: "date"
+          example: "18/09/2020 17:35:00"
+        description:
+          type: "string"
+          example: "x1 DoubleCheeseBurger"
+        payment_id:
+          type: "integer"
+          example: 1
+        total:
+          type: "number"
+          example: 3.5E+2
+        address:
+          type: "string"
+          example: "Peredo 173 6C"
+        user_id:
+          type: "integer"
+          format: "int64"
+          example: 1
+    UpdateOrderStatus:
+      type: "object"
+      properties:
+        id_status:
+          type: "integer"
+          example: 4
+    UpdatedOrder:
+      type: "object"
+      properties:
+        success:
+          type: "boolean"
+          example: true
+        msg:
+          type: "string"
+          example: "Order status updated"
+    DeletedOrder:
+      type: "object"
+      properties:
+        success:
+          type: "boolean"
+          example: true
+        msg:
+          type: "string"
+          example: "Order deleted"
+        deletedOrder:
+          type: "object"
+          properties:
+            order_id:
+              type: "integer"
+              format: "int64"
+              example: 5
+            status_id:
+              type: "integer"
+              example: 1
+            date:
+              type: "string"
+              description: "date"
+              example: "18/09/2020 17:35:00"
+            description:
+              type: "string"
+              example: "x1 DoubleCheeseBurger"
+            payment_id:
+              type: "integer"
+              example: 1
+            total:
+              type: "number"
+              example: 3.5E+2
+            address:
+              type: "string"
+              example: "Peredo 173 6C"
+            user_id:
+              type: "integer"
+              format: "int64"
+              example: 1

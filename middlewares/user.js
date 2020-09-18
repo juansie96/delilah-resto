@@ -113,14 +113,13 @@ exports.userIdExists = (req, res, next) => {
             replacements: [userId]
         })
         .then(users => {
-
             if (!users.length) {
                 res.status(404).json({
                     success: false,
                     error: "User id not found"
                 });
             } else {
-                // req.params.order = users[0];
+                req.params.user = users[0];
                 next();
             }
         })
@@ -151,4 +150,32 @@ exports.getUserOrders = (req, res, next) => {
                 error: 'Server internal error'
             });
         });
+};
+
+exports.userBody = (req, res, next) => {
+    const {
+        username,
+        password,
+        fullname,
+        email,
+        phone,
+        address
+    } = req.body;
+
+    if (username && password && fullname && email && phone && address) {
+        next();
+    } else {
+        res.status(422).json({
+            success: false,
+            error: "The body request has semantic errors",
+            schemaExample: {
+                username: "liomessi",
+                password: "fcb123",
+                fullname: "Lionel Messi",
+                email: "liomessi@gmail.com",
+                phone: "3213435312",
+                address: "España 1234"
+            }
+        });
+    }
 };

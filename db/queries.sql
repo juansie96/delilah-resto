@@ -96,8 +96,8 @@ INSERT INTO users VALUES (
 
 INSERT INTO users VALUES (
     NULL,
-    "elonx_tesla",
-    "$2a$10$ryBOJ.1mOL6MkvPTWJHJmuQdtMsC95mxDfRpLGfi9MgYfhs7aGMoi",
+    "elonmusk",
+    "$2a$10$dbPXUqw66KneUhlSgMmMDuVA0hR9GCjdpdisCGUcw.Lww7gbKTOxW",
     "Elon Musk",
     "elonmusk@spacex.com",
     "1134353453",

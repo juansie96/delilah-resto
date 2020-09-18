@@ -25,7 +25,7 @@ exports.addNewProduct = (req, res) => {
         .then(() => {
             res.status(201).json({
                 success: true,
-                msg: "Product created",
+                msg: "Product created successfully",
                 product: product
             });
         })
@@ -66,7 +66,7 @@ exports.editProductById = (req, res) => {
             replacements: [name, price, imageUrl, description, productId]
         })
         .then(() => {
-            res.status(201).json({
+            res.status(200).json({
                 success: true,
                 msg: "Product updated successfully",
                 product: product

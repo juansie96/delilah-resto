@@ -1,7 +1,7 @@
 const router = require('express').Router();
 
 const userController = require('../controllers/user');
-const { validateMailUsername, registerBody, loginBody, validateUserId, userIdExists, getUserOrders } = require('../middlewares/user');
+const { validateMailUsername, registerBody, loginBody, validateUserId, userIdExists, getUserOrders, userBody } = require('../middlewares/user');
 const {
     validateAccessToken,
     validateAdmin
@@ -10,9 +10,8 @@ const {
 router.get('/', [validateAccessToken, validateAdmin], userController.getAllUsers);
 router.post('/login', [loginBody], userController.login);
 router.post('/register', [validateMailUsername, registerBody], userController.register);
-router.get('/:userId', [validateAccessToken, validateUserId, userIdExists, getUserOrders], userController.getUserById);
-// getOrders
-// router.put('/:idUser', [validateToken, allUsersId, userBody, userId], editUserById);
-// router.delete('/:idUser', [validateToken, validateAdmin, userId], deleteUserById);
+router.get('/:userId', [validateAccessToken, userIdExists, validateUserId, getUserOrders], userController.getUserById);
+router.put('/:userId', [validateAccessToken, userIdExists, validateUserId, userBody], userController.editUserById);
+router.delete('/:userId', [validateAccessToken, validateAdmin, userIdExists], userController.deleteUserById);
 
 module.exports = router;
