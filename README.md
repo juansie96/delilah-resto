@@ -25,9 +25,9 @@ Es una API para un restaurant donde los usuarios se pueden registrar, loguear y 
 ### Requisitos para instalar el proyecto
 
 You need to have:
-- [NodeJS](https://nodejs.org/).
-- [XAMPP](https://www.apachefriends.org/es/index.html).
-- [MySQLWorkbench](https://dev.mysql.com/downloads/workbench/) for macOS users to handle the host of MySQL local database.
+- [NodeJS](https://nodejs.org/)
+- [XAMPP](https://www.apachefriends.org/es/index.html)
+- [MySQLWorkbench](https://dev.mysql.com/downloads/workbench/) 
 
 ### Pasos para instalación del proyecto
 
